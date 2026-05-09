@@ -11,6 +11,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BAOZI — claude mints",
   description: "Sign once. Claude mints. 包子 on Solana.",
+  icons: {
+    icon: "/bao/chill.jpeg",
+    apple: "/bao/chill.jpeg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
