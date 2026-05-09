@@ -10,35 +10,30 @@ export function LivePrice() {
 
   useEffect(() => {
     let prev: number | null = null;
-
     async function poll() {
       try {
         const res = await fetch(`${RELAYER}/price`);
         const d = await res.json();
         if (!d.success) return;
-        if (prev !== null) {
-          setDir(d.pricePerToken > prev ? "up" : d.pricePerToken < prev ? "down" : "same");
-        }
+        if (prev !== null) setDir(d.pricePerToken > prev ? "up" : d.pricePerToken < prev ? "down" : "same");
         prev = d.pricePerToken;
         setPrice(d.pricePerToken);
       } catch {}
     }
-
     poll();
     const id = setInterval(poll, 10_000);
     return () => clearInterval(id);
   }, []);
 
-  if (!price) return <span className="text-xs text-gray-600">loading...</span>;
+  if (!price) return null;
 
   return (
-    <div className="flex items-center gap-1.5 text-xs tabular-nums">
-      <span className="text-gray-500">$BAO</span>
-      <span className={dir === "up" ? "text-green-400" : dir === "down" ? "text-red-400" : "text-gray-300"}>
-        {price.toFixed(8)}
+    <span className="hidden sm:flex items-center gap-1.5 text-[11px] tabular-nums font-bold">
+      <span className={dir === "up" ? "text-[#00ff88]" : dir === "down" ? "text-red-400" : "text-[#555]"}>
+        {price.toFixed(9)}
       </span>
-      {dir === "up" && <span className="text-green-400">↑</span>}
+      {dir === "up" && <span className="text-[#00ff88]">↑</span>}
       {dir === "down" && <span className="text-red-400">↓</span>}
-    </div>
+    </span>
   );
 }

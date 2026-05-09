@@ -29,9 +29,7 @@ export function MintPanel() {
     } catch {}
   }, [publicKey]);
 
-  useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
   async function handleRegister() {
     if (!publicKey || !signTransaction) return;
@@ -45,96 +43,124 @@ export function MintPanel() {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
-
       const tx = Transaction.from(Buffer.from(data.transaction, "base64"));
       const signed = await signTransaction(tx);
       const sig = await connection.sendRawTransaction(signed.serialize());
       await connection.confirmTransaction(sig, "confirmed");
-
-      setMsg("Registered. You can now mint via chat.");
+      setMsg("registered. now chat to mint.");
       await fetchStatus();
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Failed");
+      setMsg(err instanceof Error ? err.message : "failed");
     } finally {
       setLoading(false);
     }
   }
 
+  /* ── not connected ── */
   if (!connected) {
     return (
-      <div className="bg-surface border border-border rounded-lg p-5 text-center">
-        <p className="text-sm text-gray-500">Connect your wallet to mint</p>
+      <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+        <div className="flex-1 flex flex-col gap-3 text-sm">
+          <Row label="wallet" value="— connect wallet —" />
+          <Row label="mints used" value="—" />
+          <Row label="ur bag" value="—" />
+          <Row label="registered" value="—" />
+        </div>
+        <p className="text-[11px] text-[#444] mt-5 pt-4 border-t border-[#1a1a1a]">
+          connect ur wallet to get some $bao. much required.
+        </p>
       </div>
     );
   }
 
+  /* ── not registered ── */
   if (!status?.registered) {
     return (
-      <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Registration</p>
-        <p className="text-sm text-gray-400 leading-relaxed">
-          Sign once to register. The relayer pays the fee — this is the only time you'll need
-          to sign without Claude prompting you.
-        </p>
-        {msg && <p className="text-xs text-brand">{msg}</p>}
+      <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+        <div className="flex-1 flex flex-col gap-3 text-sm">
+          <Row label="wallet" value={`${publicKey!.toBase58().slice(0, 6)}…${publicKey!.toBase58().slice(-4)}`} />
+          <Row label="registered" value="NO" warn />
+          <Row label="mints used" value="—" />
+          <Row label="ur bag" value="—" />
+        </div>
+        {msg && <p className="text-[11px] text-[#00ff88] mt-3">{msg}</p>}
         <button
           onClick={handleRegister}
           disabled={loading}
-          className="w-full py-2.5 bg-brand text-dark font-bold text-sm rounded hover:bg-green-400 transition disabled:opacity-50"
+          className="mt-5 w-full bg-[#00ff88] text-[#0a0a0a] font-black uppercase text-xs py-3 tracking-widest hover:bg-[#00cc6a] transition-colors disabled:opacity-50"
         >
-          {loading ? "Signing..." : "Sign Once to Register"}
+          {loading ? "SIGNING..." : "SIGN ONCE TO REGISTER →"}
         </button>
+        <p className="text-[11px] text-[#444] mt-2 text-center">relayer covers the gas fee</p>
       </div>
     );
   }
 
-  const pct = ((status.mintsUsed / 10) * 100).toFixed(0);
+  /* ── registered ── */
+  const bagSize = (status.mintsUsed * 250_000).toLocaleString();
+  const spent = (status.totalSpentLamports / 1e9).toFixed(4);
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-600">Your Mints</p>
-        <span className="text-xs text-gray-500 tabular-nums">{status.mintsUsed} / 10</span>
+    <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+
+      <div className="flex-1 flex flex-col gap-3 text-sm">
+        <Row label="wallet" value={`${publicKey!.toBase58().slice(0, 6)}…${publicKey!.toBase58().slice(-4)}`} />
+        <Row label="registered" value="YES ✓" green />
+        <Row label="mints used" value={`${status.mintsUsed} / 10`} />
+        <Row label="ur bag" value={`${bagSize} $BAO`} />
+        <Row label="spent" value={`${spent} SOL`} />
+        <Row
+          label="remaining"
+          value={status.mintsRemaining === 0 ? "maxed out" : `${status.mintsRemaining} left`}
+          warn={status.mintsRemaining === 0}
+          green={status.mintsRemaining > 0}
+        />
       </div>
 
-      {/* Pip bar */}
-      <div className="grid grid-cols-10 gap-1">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-1.5 rounded-full transition-colors ${
-              i < status.mintsUsed ? "bg-brand" : "bg-border"
-            }`}
-          />
-        ))}
+      {/* Mint progress pips */}
+      <div className="mt-5 pt-4 border-t border-[#1a1a1a] space-y-2">
+        <div className="flex gap-1">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={i}
+              className={`flex-1 h-1.5 ${i < status.mintsUsed ? "bg-[#00ff88]" : "bg-[#1e1e1e]"}`}
+            />
+          ))}
+        </div>
+        <p className="text-[11px] text-[#444]">
+          {status.mintsRemaining === 0
+            ? "max mints reached — sell or check price via chat"
+            : 'say "mint me some bao" in chat → 250k $BAO for $2'}
+        </p>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-3 gap-3 pt-1">
-        <div>
-          <p className="text-[11px] text-gray-600">$BAO held</p>
-          <p className="text-sm font-medium text-white mt-0.5">
-            {(status.mintsUsed * 250_000).toLocaleString()}
-          </p>
-        </div>
-        <div>
-          <p className="text-[11px] text-gray-600">Spent</p>
-          <p className="text-sm font-medium text-white mt-0.5">
-            {(status.totalSpentLamports / 1e9).toFixed(4)} SOL
-          </p>
-        </div>
-        <div>
-          <p className="text-[11px] text-gray-600">Remaining</p>
-          <p className={`text-sm font-medium mt-0.5 ${status.mintsRemaining === 0 ? "text-gray-500" : "text-brand"}`}>
-            {status.mintsRemaining} left
-          </p>
-        </div>
-      </div>
-
-      <p className="text-[11px] text-gray-600 border-t border-border pt-3">
-        {status.mintsRemaining === 0
-          ? "Max mints reached — chat to sell or check price."
-          : 'Tell Claude "mint me some BAO" — 250,000 $BAO for $2 each.'}
-      </p>
+function Row({
+  label,
+  value,
+  green,
+  warn,
+}: {
+  label: string;
+  value: string;
+  green?: boolean;
+  warn?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-1.5 border-b border-[#141414]">
+      <span className="text-[11px] text-[#555] uppercase tracking-wider shrink-0">{label}</span>
+      <span
+        className={`text-xs font-bold text-right ${
+          green ? "text-[#00ff88]" : warn ? "text-yellow-500" : "text-[#aaa]"
+        }`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

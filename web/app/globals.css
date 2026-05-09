@@ -13,53 +13,56 @@
 }
 
 body {
-  background: #080808;
+  background-color: #0a0a0a;
   color: #ffffff;
   font-family: var(--font-mono), monospace;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Wallet adapter overrides */
+/* outlined text — green stroke, transparent fill */
+.text-outline {
+  -webkit-text-stroke: 2px #00ff88;
+  color: transparent;
+}
+
+/* ── Wallet adapter ── */
 .wallet-adapter-button {
   background-color: transparent !important;
-  color: #00ff88 !important;
-  border: 1px solid #1f1f1f !important;
+  color: #ffffff !important;
+  border: 2px solid #2a2a2a !important;
   font-family: var(--font-mono), monospace !important;
   font-size: 12px !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  padding: 8px 16px !important;
-  transition: border-color 0.15s ease !important;
+  font-weight: 700 !important;
+  border-radius: 4px !important;
+  padding: 10px 20px !important;
+  height: auto !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: border-color 0.15s, color 0.15s !important;
 }
-
 .wallet-adapter-button:hover {
-  background-color: transparent !important;
   border-color: #00ff88 !important;
+  color: #00ff88 !important;
+  background-color: transparent !important;
 }
-
 .wallet-adapter-button-trigger {
   background-color: #00ff88 !important;
-  color: #080808 !important;
-  border: none !important;
+  color: #0a0a0a !important;
+  border: 2px solid #00ff88 !important;
 }
-
 .wallet-adapter-button-trigger:hover {
   background-color: #00cc6a !important;
+  border-color: #00cc6a !important;
+  color: #0a0a0a !important;
 }
-
 .wallet-adapter-modal-wrapper {
   background: #111 !important;
-  border: 1px solid #1f1f1f !important;
-  border-radius: 12px !important;
+  border: 2px solid #2a2a2a !important;
+  border-radius: 8px !important;
 }
 
-/* Scrollbar */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #333; }
-
-/* Smooth transitions globally */
-* {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
+::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
