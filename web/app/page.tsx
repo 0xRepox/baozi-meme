@@ -14,7 +14,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b-2 border-[#1a1a1a] bg-[#0a0a0a]/95 backdrop-blur">
         <div className="max-w-4xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/bao/chill.jpeg" alt="BAO" width={28} height={28} className="rounded" />
+            <Image src="/bao/t-chill.png" alt="BAO" width={28} height={28} />
             <span className="font-black text-sm tracking-tight uppercase">BAOZI <span className="text-[#555] font-normal">$bao</span></span>
           </div>
           <div className="flex items-center gap-4">
@@ -26,45 +26,57 @@ export default function Home() {
 
       {/* ── Hero ── */}
       <section className="max-w-4xl mx-auto px-5 pt-14 pb-12">
-        {/* Tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-8">
-          {["MCP", "CLAUDE", "SOLANA", "FAIR LAUNCH"].map((t) => (
-            <span key={t} className="text-[11px] font-bold border border-[#2a2a2a] px-2 py-0.5 uppercase tracking-widest text-[#888]">
-              {t}
-            </span>
-          ))}
-          <span className="text-[#444] font-bold text-lg ml-1">/</span>
-          <span className="text-[11px] text-[#555]">the first meme coin you mint through claude.</span>
-        </div>
+        <div className="flex flex-col lg:flex-row lg:items-end lg:gap-10">
 
-        {/* Big headline */}
-        <h1 className="font-black uppercase leading-[0.88] tracking-tighter text-[clamp(52px,12vw,108px)]">
-          MINT $BAO
-          <br />THROUGH
-          <br />CLAUDE
-        </h1>
+          {/* Left: text */}
+          <div className="flex-1 min-w-0">
+            {/* Tags */}
+            <div className="flex flex-wrap items-center gap-2 mb-8">
+              {["MCP", "CLAUDE", "SOLANA", "FAIR LAUNCH"].map((t) => (
+                <span key={t} className="text-[11px] font-bold border border-[#2a2a2a] px-2 py-0.5 uppercase tracking-widest text-[#666]">
+                  {t}
+                </span>
+              ))}
+            </div>
 
-        {/* Outlined subheadline */}
-        <p className="text-outline font-black uppercase leading-tight tracking-tight mt-4 text-[clamp(20px,4.5vw,44px)]">
-          ONE SIGN. CLAUDE MINTS. 包子.
-        </p>
+            <h1 className="font-black uppercase leading-[0.88] tracking-tighter text-[clamp(52px,12vw,108px)]">
+              MINT $BAO
+              <br />THROUGH
+              <br />CLAUDE
+            </h1>
 
-        {/* Body copy */}
-        <p className="text-[#666] text-sm mt-6 max-w-lg leading-relaxed">
-          sign once to register ur wallet. after that, tell claude{" "}
-          <span className="text-[#aaa] font-bold">"mint me some bao"</span>. the relayer ships
-          mint txs on ur behalf. only u get credited. zero trust, max bao, no rug.
-        </p>
+            <p className="text-outline font-black uppercase leading-tight tracking-tight mt-4 text-[clamp(20px,4.5vw,42px)]">
+              ONE SIGN. CLAUDE MINTS. 包子.
+            </p>
 
-        {/* CTAs */}
-        <div className="flex flex-wrap gap-3 mt-8">
-          <a
-            href="#chat"
-            className="inline-block bg-[#00ff88] text-[#0a0a0a] font-black uppercase text-sm px-6 py-3 tracking-wide hover:bg-[#00cc6a] transition-colors"
-          >
-            CHAT WITH CLAUDE →
-          </a>
-          <WalletButton />
+            <p className="text-[#555] text-sm mt-6 max-w-md leading-relaxed">
+              sign once to register ur wallet. after that, tell claude{" "}
+              <span className="text-[#999] font-bold">"mint me some bao"</span>. the relayer ships
+              mint txs on ur behalf. only u get credited. zero trust, max bao, no rug.
+            </p>
+
+            <div className="flex flex-wrap gap-3 mt-8">
+              <a
+                href="#chat"
+                className="inline-block bg-[#00ff88] text-[#0a0a0a] font-black uppercase text-sm px-6 py-3 tracking-wide hover:bg-[#00cc6a] transition-colors"
+              >
+                CHAT WITH CLAUDE →
+              </a>
+              <WalletButton />
+            </div>
+          </div>
+
+          {/* Right: floating mascot */}
+          <div className="hidden lg:block flex-shrink-0 -mb-4">
+            <Image
+              src="/bao/t-chill.png"
+              alt="BAOZI mascot"
+              width={280}
+              height={280}
+              className="drop-shadow-[0_0_40px_rgba(255,255,255,0.08)]"
+              priority
+            />
+          </div>
         </div>
       </section>
 

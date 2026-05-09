@@ -3,7 +3,7 @@ import Image from "next/image";
 const STEPS = [
   {
     n: "1",
-    img: "/bao/steamer.jpeg",
+    img: "/bao/t-steamer.png",
     label: "STEP 1",
     title: "SIGN ONCE",
     body: "connect phantom or solflare. sign once to register ur wallet. the relayer covers the gas. wallet pops once. that's literally it.",
@@ -11,7 +11,7 @@ const STEPS = [
   },
   {
     n: "2",
-    img: "/bao/chill.jpeg",
+    img: "/bao/t-chill.png",
     label: "STEP 2",
     title: "ASK CLAUDE",
     body: 'say "mint me some bao" or "what\'s the price?" or "sell half my tokens". claude figures it out and builds the tx.',
@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     n: "3",
-    img: "/bao/jump.jpeg",
+    img: "/bao/t-jump.png",
     label: "STEP 3",
     title: "包子 MINTS",
     body: "claude sends the tx back. ur wallet pops once to approve. 250,000 $BAO lands in ur wallet. only u can get credited. no rug.",
@@ -51,10 +51,8 @@ export function HowItWorks() {
               {s.n}
             </div>
 
-            {/* Baozi */}
-            <div className="w-14 h-14 overflow-hidden rounded-lg">
-              <Image src={s.img} alt={s.title} width={56} height={56} className="w-full h-full object-cover" />
-            </div>
+            {/* Baozi — transparent, floats freely */}
+            <Image src={s.img} alt={s.title} width={72} height={72} className="object-contain" />
 
             {/* Label + title */}
             <div>
