@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-mono: "Geist Mono", "Fira Code", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #080808;
+  color: #ffffff;
+  font-family: var(--font-mono), monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Wallet adapter overrides */
+.wallet-adapter-button {
+  background-color: transparent !important;
+  color: #00ff88 !important;
+  border: 1px solid #1f1f1f !important;
+  font-family: var(--font-mono), monospace !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  transition: border-color 0.15s ease !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: transparent !important;
+  border-color: #00ff88 !important;
+}
+
+.wallet-adapter-button-trigger {
+  background-color: #00ff88 !important;
+  color: #080808 !important;
+  border: none !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background-color: #00cc6a !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #111 !important;
+  border: 1px solid #1f1f1f !important;
+  border-radius: 12px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
+
+/* Smooth transitions globally */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -1,0 +1,19 @@
+{
+  "name": "solana-launchpad",
+  "private": true,
+  "workspaces": [
+    "web",
+    "relayer",
+    "mcp"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0"
+  },
+  "packageManager": "pnpm@10.15.0"
+}
