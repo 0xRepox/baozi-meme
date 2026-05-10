@@ -7,10 +7,16 @@ import { getConnection, getBondingCurvePda } from "../solana.js";
 // + real_sol_reserves(8) + real_token_reserves(8)
 // + token_total_supply(8) + graduated(1) + bump(1)
 const FIELDS_OFFSET = 8 + 32 + 32 + 32; // 104
-
 const MINT_FEE_LAMPORTS = 22_000_000;
+const CACHE_TTL_MS = 10_000; // serve cached data for 10s — 1 RPC call per 10s regardless of traffic
+
+let cache: { data: object; expiresAt: number } | null = null;
 
 export const priceRoute = new Hono().get("/", async (c) => {
+  if (cache && Date.now() < cache.expiresAt) {
+    return c.json(cache.data);
+  }
+
   try {
     const connection = getConnection();
     const bondingCurvePda = getBondingCurvePda();
@@ -35,7 +41,7 @@ export const priceRoute = new Hono().get("/", async (c) => {
     const marketCapSol = (pricePerToken * tokenTotalSupply) / 1e9;
     const mintsDone = Math.floor(realSolReserves / MINT_FEE_LAMPORTS);
 
-    return c.json({
+    const data = {
       success: true,
       virtualSolReserves,
       virtualTokenReserves,
@@ -45,7 +51,9 @@ export const priceRoute = new Hono().get("/", async (c) => {
       pricePerToken,
       marketCapSol,
       mintsDone,
-    });
+    };
+    cache = { data, expiresAt: Date.now() + CACHE_TTL_MS };
+    return c.json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return c.json({ success: false, error: message }, 500);
