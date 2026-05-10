@@ -36,8 +36,7 @@ const CLAIMS = [
   { label: "100% mint fees → Meteora LP", desc: "All SOL from mints goes directly to the treasury address at mint time — no escrow, no delay. Dev will add 100% to Meteora DLMM pool at graduation. Verifiable: every mint tx shows SOL transfer to treasury." },
   { label: "LP locked 1 year", desc: "Meteora DLMM lockReleasePoint set 1 year from graduation. LP position publicly verifiable on Meteora." },
   { label: "LP fee share only", desc: "Dev earns zero from mints. Zero protocol fee on trades. Only revenue = Meteora LP fee share from trading activity after graduation." },
-  { label: "Contract is immutable", desc: "No upgrade authority on the deployed program. What's deployed is what runs — forever." },
-  { label: "Max 10 mints per wallet", desc: "UserAccount.mints_used checked on-chain before every mint. Enforced by the Anchor program, not just the UI." },
+{ label: "Max 10 mints per wallet", desc: "UserAccount.mints_used checked on-chain before every mint. Enforced by the Anchor program, not just the UI." },
   { label: "Recipient == caller", desc: "The relayer builds the tx but tokens always credited to the user's registered wallet. Contract enforces this — relayer cannot redirect tokens." },
 ];
 
@@ -231,12 +230,7 @@ export default function ReceiptsPage() {
                 cmd: `curl https://relayer.baozi.meme/price`,
                 note: "→ totalMinted and slotsRemaining from MintState PDA",
               },
-              {
-                label: "program is immutable",
-                cmd: `solana program show ${PROGRAM_ID} --url devnet`,
-                note: "→ upgrade authority should be none",
-              },
-              {
+{
                 label: "lp pool locked",
                 cmd: "check Meteora pool page after graduation",
                 note: "→ lockReleasePoint timestamp verifiable on Meteora",
