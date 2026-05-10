@@ -16,4 +16,6 @@ pub enum LaunchpadError {
     MathOverflow,
     #[msg("Zero amount not allowed")]
     ZeroAmount,
+    #[msg("Unauthorized")]
+    Unauthorized,
 }

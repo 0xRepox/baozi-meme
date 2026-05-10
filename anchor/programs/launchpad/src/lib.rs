@@ -35,4 +35,8 @@ pub mod launchpad {
     pub fn graduate(ctx: Context<Graduate>) -> Result<()> {
         instructions::graduate::graduate(ctx)
     }
+
+    pub fn emergency_withdraw(ctx: Context<EmergencyWithdraw>) -> Result<()> {
+        instructions::emergency_withdraw::emergency_withdraw(ctx)
+    }
 }
