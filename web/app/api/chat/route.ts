@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     ],
     tools: {
       get_price: tool({
-        description: "Get current $BAO price and bonding curve status",
+        description: "Get current $BAO mint progress and status",
         inputSchema: z.object({}),
         execute: async () => {
           const r = await fetch(`${RELAYER}/price`);
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             .describe("Number of mint slots (1–10)"),
         }),
         execute: async ({ quantity }) => {
-          const r = await fetch(`${RELAYER}/buy`, {
+          const r = await fetch(`${RELAYER}/mint`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ wallet, quantity }),
@@ -79,27 +79,6 @@ export async function POST(req: NextRequest) {
         },
       }),
 
-      sell_tokens: tool({
-        description: "Sell $BAO tokens back to the bonding curve",
-        inputSchema: z.object({
-          amount: z.number().positive()
-            .describe("Token amount with 6 decimals, e.g. 250000000000 for 250,000 tokens"),
-        }),
-        execute: async ({ amount }) => {
-          const r = await fetch(`${RELAYER}/sell`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ wallet, tokenAmount: amount }),
-          });
-          const d = await r.json();
-          if (d.transaction) {
-            pendingTransaction = d.transaction;
-            const { transaction: _, ...rest } = d;
-            return { ...rest, transactionReady: true };
-          }
-          return d;
-        },
-      }),
     },
   });
 

@@ -174,7 +174,7 @@ export default function Home() {
         <HowItWorks />
       </section>
 
-      {/* ── Bonding Curve ── */}
+      {/* ── Mint Progress ── */}
       <section className="bg-[#FFF8E1] border-t-2 border-[#C8102E]/20 py-10">
         <div className="max-w-5xl mx-auto px-5">
           <MintProgress />
@@ -216,7 +216,7 @@ export default function Home() {
                 TOKENOMICS
               </p>
               <p className="text-white/40 text-xs mt-2 leading-relaxed">
-                Supply · Bonding curve · Graduation · Fee structure
+                Supply · Fixed price · Graduation · Fee structure
               </p>
             </Link>
             <Link href="/receipts" className="group p-6 stamp-light transition-colors hover:bg-white/5">

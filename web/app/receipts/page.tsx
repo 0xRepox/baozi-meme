@@ -33,7 +33,7 @@ const PILLARS = [
 const CLAIMS = [
   { label: "No presale", desc: "0 tokens distributed before public mint opened. Enforced by contract — mint requires registered wallet, no backdoor." },
   { label: "0% team allocation", desc: "Team retains 0 $BAO. No team mint in the program. Verifiable by reading the Anchor program." },
-  { label: "100% mint fees → Meteora LP", desc: "All mint fees escrow in the bonding curve PDA. At graduation they go 100% to Meteora DLMM liquidity pool. Zero to dev." },
+  { label: "100% mint fees → Meteora LP", desc: "All SOL from mints goes directly to the treasury address at mint time — no escrow, no delay. Dev will add 100% to Meteora DLMM pool at graduation. Verifiable: every mint tx shows SOL transfer to treasury." },
   { label: "LP locked 1 year", desc: "Meteora DLMM lockReleasePoint set 1 year from graduation. LP position publicly verifiable on Meteora." },
   { label: "LP fee share only", desc: "Dev earns zero from mints. Zero protocol fee on trades. Only revenue = Meteora LP fee share from trading activity after graduation." },
   { label: "Contract is immutable", desc: "No upgrade authority on the deployed program. What's deployed is what runs — forever." },
@@ -42,10 +42,9 @@ const CLAIMS = [
 ];
 
 const MCP_TOOLS = [
-  { name: "get_price", desc: "Current token price and bonding curve stats" },
+  { name: "get_price", desc: "Current mint progress, slots remaining, and live stats" },
   { name: "get_user_status", desc: "Mints used, remaining slots, wallet bag" },
   { name: "mint_tokens", desc: "Builds partial tx — returns to Claude for wallet approval" },
-  { name: "sell_tokens", desc: "Sells tokens back through the bonding curve" },
 ];
 
 export default function ReceiptsPage() {
@@ -194,7 +193,7 @@ export default function ReceiptsPage() {
           <p className="text-[11px] uppercase tracking-[0.25em] text-[#7A4200] font-bold mb-6">— AI INTEGRATION —</p>
           <div className="bg-white stamp p-6 space-y-4">
             {[
-              { label: "mcp endpoint", value: `${process.env.NEXT_PUBLIC_RELAYER_URL ?? "https://your-relayer.com"}/mcp` },
+              { label: "mcp endpoint", value: "https://mcp.baozi.meme" },
               { label: "protocol", value: "MCP over HTTP + SSE" },
               { label: "model", value: "claude-sonnet-4-6" },
             ].map(({ label, value }) => (
@@ -229,8 +228,8 @@ export default function ReceiptsPage() {
             {[
               {
                 label: "mint slots used",
-                cmd: `solana account ${PROGRAM_ID} --url devnet`,
-                note: "→ read real_sol_reserves field from BondingCurve PDA",
+                cmd: `curl https://relayer.baozi.meme/price`,
+                note: "→ totalMinted and slotsRemaining from MintState PDA",
               },
               {
                 label: "program is immutable",

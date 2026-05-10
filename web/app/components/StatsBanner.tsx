@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 const RELAYER = process.env.NEXT_PUBLIC_RELAYER_URL ?? "http://localhost:3001";
 
 type PriceData = {
-  pricePerToken: number;
-  realSolReserves: number;
-  marketCapSol: number;
+  totalMinted: number;
+  slotsRemaining: number;
   graduated: boolean;
+  progressPct: number;
+  totalSolRaised: number;
 };
 
 export function StatsBanner() {
@@ -27,20 +28,20 @@ export function StatsBanner() {
     return () => clearInterval(id);
   }, []);
 
-  const raised = data ? (data.realSolReserves / 1e9).toFixed(2) : "—";
-  const pct = data ? ((data.realSolReserves / 85_000_000_000) * 100).toFixed(1) : "0.0";
-  const mcap = data ? data.marketCapSol.toFixed(2) : "—";
+  const raised = data ? data.totalSolRaised.toFixed(2) : "—";
+  const pct = data ? data.progressPct.toFixed(1) : "0.0";
+  const target = (20_000 * 0.022).toFixed(0); // 440 SOL target
 
   return (
     <div className="border-b border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-8 gap-y-2 text-xs">
-        <Stat label="Price" value={data ? `${data.pricePerToken.toFixed(8)} SOL` : "—"} />
+        <Stat label="Price" value="0.022 SOL" />
         <div className="w-px h-3 bg-border hidden sm:block" />
-        <Stat label="Raised" value={`${raised} / 85 SOL`} />
+        <Stat label="Raised" value={`${raised} / ${target} SOL`} />
         <div className="w-px h-3 bg-border hidden sm:block" />
-        <Stat label="To Raydium" value={`${pct}%`} highlight />
+        <Stat label="Filled" value={`${pct}%`} highlight />
         <div className="w-px h-3 bg-border hidden sm:block" />
-        <Stat label="Mkt Cap" value={`${mcap} SOL`} />
+        <Stat label="Slots Left" value={data ? data.slotsRemaining.toLocaleString() : "—"} />
         {data?.graduated && (
           <>
             <div className="w-px h-3 bg-border hidden sm:block" />

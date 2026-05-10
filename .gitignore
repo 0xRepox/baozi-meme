@@ -33,3 +33,4 @@ Thumbs.db
 .idea/
 # Solana keypair files
 *-keypair.json
+.vercel

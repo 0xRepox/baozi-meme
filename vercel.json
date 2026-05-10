@@ -1,0 +1,8 @@
+{
+  "experimentalServices": {
+    "relayer": {
+      "entrypoint": "relayer",
+      "routePrefix": "/"
+    }
+  }
+}

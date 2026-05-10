@@ -16,27 +16,31 @@ pub mod launchpad {
         instructions::initialize::initialize(ctx)
     }
 
-    pub fn create_curve_token_account(ctx: Context<CreateCurveTokenAccount>) -> Result<()> {
-        instructions::initialize::create_curve_token_account(ctx)
+    pub fn create_mint_state_token_account(ctx: Context<CreateMintStateTokenAccount>) -> Result<()> {
+        instructions::initialize::create_mint_state_token_account(ctx)
     }
 
     pub fn register_user(ctx: Context<RegisterUser>) -> Result<()> {
         instructions::register_user::register_user(ctx)
     }
 
-    pub fn buy(ctx: Context<Buy>, min_tokens_out: u64) -> Result<()> {
-        instructions::buy::buy(ctx, min_tokens_out)
-    }
-
-    pub fn sell(ctx: Context<Sell>, token_amount: u64, min_sol_out: u64) -> Result<()> {
-        instructions::sell::sell(ctx, token_amount, min_sol_out)
+    pub fn mint_tokens(ctx: Context<MintTokens>, quantity: u8) -> Result<()> {
+        instructions::mint::mint_tokens(ctx, quantity)
     }
 
     pub fn graduate(ctx: Context<Graduate>) -> Result<()> {
         instructions::graduate::graduate(ctx)
     }
 
-    pub fn emergency_withdraw(ctx: Context<EmergencyWithdraw>) -> Result<()> {
-        instructions::emergency_withdraw::emergency_withdraw(ctx)
+    pub fn emergency_halt(ctx: Context<EmergencyHalt>) -> Result<()> {
+        instructions::emergency_halt::emergency_halt(ctx)
+    }
+
+    pub fn transfer_authority(ctx: Context<TransferAuthority>) -> Result<()> {
+        instructions::transfer_authority::transfer_authority(ctx)
+    }
+
+    pub fn create_metadata(ctx: Context<CreateMetadata>, name: String, symbol: String, uri: String) -> Result<()> {
+        instructions::create_metadata::create_metadata(ctx, name, symbol, uri)
     }
 }

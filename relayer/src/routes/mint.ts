@@ -2,14 +2,14 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { PublicKey } from "@solana/web3.js";
-import { buildBuyTx, getUserStatus } from "../solana.js";
+import { buildMintTx, getUserStatus } from "../solana.js";
 
 const schema = z.object({
   wallet: z.string().min(32),
   quantity: z.number().int().min(1).max(10).default(1),
 });
 
-export const buyRoute = new Hono().post(
+export const mintRoute = new Hono().post(
   "/",
   zValidator("json", schema),
   async (c) => {
@@ -27,7 +27,7 @@ export const buyRoute = new Hono().post(
       }
 
       const actualQty = Math.min(quantity, status.mintsRemaining);
-      const tx = await buildBuyTx(userPubkey, actualQty);
+      const tx = await buildMintTx(userPubkey, actualQty);
       const serialized = tx.serialize({ requireAllSignatures: false }).toString("base64");
       const tokensToReceive = actualQty * 250_000;
 

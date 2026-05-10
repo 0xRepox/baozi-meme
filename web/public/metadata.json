@@ -1,0 +1,17 @@
+{
+  "name": "Baozi",
+  "symbol": "$BAO",
+  "description": "The first memecoin on Solana where an AI agent handles the mint. Connect our MCP to Claude, say the word, you approve. The future of launches isn't a pump — it's a conversation. 20,000 slots. 0.022 SOL.",
+  "image": "https://baozi.meme/logo.png",
+  "external_url": "https://baozi.meme",
+  "attributes": [],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://baozi.meme/logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

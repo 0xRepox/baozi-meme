@@ -6,11 +6,9 @@ pub enum LaunchpadError {
     MaxMintsReached,
     #[msg("Insufficient SOL for mint fee")]
     InsufficientFee,
-    #[msg("Token already graduated to DEX")]
+    #[msg("Minting is closed")]
     AlreadyGraduated,
-    #[msg("Slippage tolerance exceeded")]
-    SlippageExceeded,
-    #[msg("Bonding curve is not ready to graduate")]
+    #[msg("Not ready to graduate — mint cap not reached")]
     NotReadyToGraduate,
     #[msg("Math overflow")]
     MathOverflow,

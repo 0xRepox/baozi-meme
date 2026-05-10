@@ -27,17 +27,17 @@ function createMcpServer(): McpServer {
         return { content: [{ type: "text" as const, text: `Error: ${data.error}` }] };
       }
 
-      const graduated = data.graduated ? "YES — trading on Meteora" : "NO — bonding curve active";
-      const slotsUsed = Math.round((data.realSolReserves as number) / 22_000_000);
-      const progress = ((slotsUsed / 20_000) * 100).toFixed(1);
+      const graduated = data.graduated ? "YES — trading on Meteora" : "NO — minting active";
+      const progress = (data.progressPct as number).toFixed(1);
 
       return {
         content: [{
           type: "text" as const,
           text: [
-            `Price: ${data.pricePerToken} SOL per token`,
-            `Market cap: ${data.marketCapSol} SOL`,
-            `Slots filled: ${slotsUsed.toLocaleString()} / 20,000 (${progress}%)`,
+            `Price: ${data.pricePerMintSol} SOL per mint (250,000 $BAO)`,
+            `Slots filled: ${(data.totalMinted as number).toLocaleString()} / 20,000 (${progress}%)`,
+            `Slots remaining: ${(data.slotsRemaining as number).toLocaleString()}`,
+            `Total SOL raised: ${(data.totalSolRaised as number).toFixed(2)} SOL`,
             `Graduated: ${graduated}`,
           ].join("\n"),
         }],
@@ -107,7 +107,7 @@ function createMcpServer(): McpServer {
 
       const actualQty = Math.min(quantity, userData.mintsRemaining as number);
 
-      const res = await fetch(`${RELAYER_URL}/buy`, {
+      const res = await fetch(`${RELAYER_URL}/mint`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet, quantity: actualQty }),
@@ -125,37 +125,6 @@ function createMcpServer(): McpServer {
             `PENDING_TX:${data.transaction}`,
             `Minting ${(data.tokensToReceive as number).toLocaleString()} $BAO (${actualQty} slot${actualQty > 1 ? "s" : ""} × 0.022 SOL). Approve in wallet.`,
             `Mints remaining after: ${data.mintsRemaining}`,
-          ].join("\n"),
-        }],
-      };
-    }
-  );
-
-  server.tool(
-    "sell_tokens",
-    "Sell $BAO tokens back to the bonding curve for SOL",
-    {
-      wallet: z.string().describe("Solana wallet public key"),
-      amount: z.number().positive().describe("Number of tokens to sell"),
-    },
-    async ({ wallet, amount }) => {
-      const res = await fetch(`${RELAYER_URL}/sell`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet, tokenAmount: amount, minSolOut: 0 }),
-      });
-      const data = await res.json() as Record<string, unknown>;
-
-      if (!data.success) {
-        return { content: [{ type: "text" as const, text: `Sell failed: ${data.error}` }] };
-      }
-
-      return {
-        content: [{
-          type: "text" as const,
-          text: [
-            `PENDING_TX:${data.transaction}`,
-            `Selling ${amount.toLocaleString()} $BAO. Approve in wallet.`,
           ].join("\n"),
         }],
       };
@@ -192,7 +161,7 @@ const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse
     return;
   }
 
-  if (url.pathname !== "/mcp") {
+  if (url.pathname !== "/") {
     res.writeHead(404).end("Not found");
     return;
   }
@@ -257,6 +226,6 @@ const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse
 
 httpServer.listen(PORT, () => {
   console.error(`MCP HTTP server running on :${PORT}`);
-  console.error(`Endpoint: http://localhost:${PORT}/mcp`);
+  console.error(`Endpoint: http://localhost:${PORT}/`);
   console.error(`Relayer:  ${RELAYER_URL}`);
 });

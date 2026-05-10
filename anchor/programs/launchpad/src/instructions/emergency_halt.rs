@@ -2,11 +2,11 @@ use anchor_lang::prelude::*;
 use crate::state::MintState;
 use crate::errors::LaunchpadError;
 
-/// Authority-triggered graduation once all 20,000 slots are minted.
-/// Marks the curve closed and drains escrowed SOL to the authority wallet
-/// so they can manually seed the Meteora DLMM LP.
+/// Authority-only emergency halt — instantly stops all minting by marking
+/// the contract as graduated. Use if something goes wrong before mint-out.
+/// SOL fees already went to treasury on each mint, so no SOL is recovered here.
 #[derive(Accounts)]
-pub struct Graduate<'info> {
+pub struct EmergencyHalt<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
@@ -17,20 +17,18 @@ pub struct Graduate<'info> {
         has_one = authority,
     )]
     pub mint_state: Account<'info, MintState>,
-
-    pub system_program: Program<'info, System>,
 }
 
-pub fn graduate(ctx: Context<Graduate>) -> Result<()> {
+pub fn emergency_halt(ctx: Context<EmergencyHalt>) -> Result<()> {
     let ms = &mut ctx.accounts.mint_state;
 
     require!(!ms.graduated, LaunchpadError::AlreadyGraduated);
-    require!(ms.is_complete(), LaunchpadError::NotReadyToGraduate);
 
     ms.graduated = true;
 
-    emit!(GraduationEvent {
+    emit!(EmergencyHaltEvent {
         mint: ms.mint,
+        authority: ctx.accounts.authority.key(),
         total_minted: ms.total_minted,
     });
 
@@ -38,7 +36,8 @@ pub fn graduate(ctx: Context<Graduate>) -> Result<()> {
 }
 
 #[event]
-pub struct GraduationEvent {
+pub struct EmergencyHaltEvent {
     pub mint: Pubkey,
+    pub authority: Pubkey,
     pub total_minted: u32,
 }
