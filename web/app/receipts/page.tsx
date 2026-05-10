@@ -126,7 +126,7 @@ export default function ReceiptsPage() {
           <div className="stamp bg-[#1A0500] p-6 space-y-4">
             {[
               { label: "program (launchpad)", value: PROGRAM_ID },
-              { label: "chain", value: "Solana devnet" },
+              { label: "chain", value: "Solana mainnet" },
               { label: "lp pool", value: "Meteora DLMM — set at graduation" },
               { label: "lp lock", value: "Meteora lockReleasePoint — 1 year" },
             ].map(({ label, value }) => (
@@ -135,7 +135,7 @@ export default function ReceiptsPage() {
                 <span className="font-mono text-xs text-white break-all">{value}</span>
                 {label === "program (launchpad)" && (
                   <a
-                    href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
+                    href={`https://explorer.solana.com/address/${PROGRAM_ID}`}
                     target="_blank" rel="noopener noreferrer"
                     className="text-[10px] font-bold uppercase tracking-widest text-[#C8102E] hover:text-[#F7C500] flex-shrink-0"
                   >
@@ -227,7 +227,7 @@ export default function ReceiptsPage() {
             {[
               {
                 label: "mint slots used",
-                cmd: `curl https://relayer.baozi.meme/price`,
+                cmd: "curl https://relayer.baozi.meme/price",
                 note: "→ totalMinted and slotsRemaining from MintState PDA",
               },
 {
