@@ -1,9 +1,9 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateText, stepCountIs, tool } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY });
 
 const SYSTEM_PROMPT = `You are the minting assistant for BAOZI ($BAO) on Solana.
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   let pendingTransaction: string | undefined;
 
   const { text } = await generateText({
-    model: anthropic("claude-sonnet-4-6"),
+    model: openrouter("anthropic/claude-sonnet-4.6"),
     system: SYSTEM_PROMPT,
     stopWhen: stepCountIs(5),
     messages: [
