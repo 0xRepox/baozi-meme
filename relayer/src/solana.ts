@@ -5,7 +5,6 @@ import { createHash } from "crypto";
 
 export const PROGRAM_ID = new PublicKey("BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV");
 export const MINT_PUBKEY = new PublicKey(process.env.MINT_PUBKEY!);
-export const TREASURY_PUBKEY = new PublicKey(process.env.TREASURY_PUBKEY!);
 
 export function getConnection(): Connection {
   return new Connection(process.env.RPC_URL ?? "https://api.devnet.solana.com", "confirmed");
@@ -65,6 +64,15 @@ export async function buildRegisterUserTx(userPubkey: PublicKey): Promise<Transa
   return tx;
 }
 
+export async function getMintStateAuthority(): Promise<PublicKey> {
+  const connection = getConnection();
+  const mintStatePda = getMintStatePda();
+  const info = await connection.getAccountInfo(mintStatePda);
+  if (!info) throw new Error("MintState PDA not found — program not initialized");
+  // MintState layout: discriminator(8) + mint(32) + authority(32)
+  return new PublicKey(info.data.slice(40, 72));
+}
+
 export async function buildMintTx(userPubkey: PublicKey, quantity: number = 1): Promise<Transaction> {
   const qty = Math.max(1, Math.min(10, Math.floor(quantity)));
   const connection = getConnection();
@@ -72,6 +80,7 @@ export async function buildMintTx(userPubkey: PublicKey, quantity: number = 1): 
   const mintStatePda = getMintStatePda();
   const userAccountPda = getUserAccountPda(userPubkey);
   const userTokenAccount = await getAssociatedTokenAddress(MINT_PUBKEY, userPubkey);
+  const treasury = await getMintStateAuthority();
 
   const tx = new Transaction();
   tx.feePayer = relayer.publicKey;
@@ -96,7 +105,7 @@ export async function buildMintTx(userPubkey: PublicKey, quantity: number = 1): 
       { pubkey: userAccountPda, isSigner: false, isWritable: true },
       { pubkey: MINT_PUBKEY, isSigner: false, isWritable: true },
       { pubkey: userTokenAccount, isSigner: false, isWritable: true },
-      { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
+      { pubkey: treasury, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
