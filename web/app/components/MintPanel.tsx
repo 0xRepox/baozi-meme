@@ -29,7 +29,11 @@ export function MintPanel() {
     } catch {}
   }, [publicKey]);
 
-  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+  useEffect(() => {
+    fetchStatus();
+    const id = setInterval(fetchStatus, 5_000);
+    return () => clearInterval(id);
+  }, [fetchStatus]);
 
   async function handleRegister() {
     if (!publicKey || !signTransaction) return;
@@ -59,15 +63,15 @@ export function MintPanel() {
   /* ── not connected ── */
   if (!connected) {
     return (
-      <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+      <div className="bg-white stamp p-5 h-full flex flex-col">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#7A4200] mb-4 font-bold">UR STATUS</p>
         <div className="flex-1 flex flex-col gap-3 text-sm">
           <Row label="wallet" value="— connect wallet —" />
           <Row label="mints used" value="—" />
           <Row label="ur bag" value="—" />
           <Row label="registered" value="—" />
         </div>
-        <p className="text-[11px] text-[#444] mt-5 pt-4 border-t border-[#1a1a1a]">
+        <p className="text-[11px] text-[#7A4200]/60 mt-5 pt-4 border-t border-[#f0e8c0]">
           connect ur wallet to get some $bao. much required.
         </p>
       </div>
@@ -77,23 +81,23 @@ export function MintPanel() {
   /* ── not registered ── */
   if (!status?.registered) {
     return (
-      <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+      <div className="bg-white stamp p-5 h-full flex flex-col">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[#7A4200] mb-4 font-bold">UR STATUS</p>
         <div className="flex-1 flex flex-col gap-3 text-sm">
           <Row label="wallet" value={`${publicKey!.toBase58().slice(0, 6)}…${publicKey!.toBase58().slice(-4)}`} />
           <Row label="registered" value="NO" warn />
           <Row label="mints used" value="—" />
           <Row label="ur bag" value="—" />
         </div>
-        {msg && <p className="text-[11px] text-[#00ff88] mt-3">{msg}</p>}
+        {msg && <p className="text-[11px] text-[#006064] mt-3">{msg}</p>}
         <button
           onClick={handleRegister}
           disabled={loading}
-          className="mt-5 w-full bg-[#00ff88] text-[#0a0a0a] font-black uppercase text-xs py-3 tracking-widest hover:bg-[#00cc6a] transition-colors disabled:opacity-50"
+          className="mt-5 w-full bg-[#C8102E] text-white font-black uppercase text-xs py-3 tracking-widest stamp-btn"
         >
           {loading ? "SIGNING..." : "SIGN ONCE TO REGISTER →"}
         </button>
-        <p className="text-[11px] text-[#444] mt-2 text-center">relayer covers the gas fee</p>
+        <p className="text-[11px] text-[#7A4200]/60 mt-2 text-center">~0.002 SOL one-time token account fee</p>
       </div>
     );
   }
@@ -103,8 +107,8 @@ export function MintPanel() {
   const spent = (status.totalSpentLamports / 1e9).toFixed(4);
 
   return (
-    <div className="border-2 border-[#1e1e1e] bg-[#0f0f0f] p-5 h-full flex flex-col">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-[#444] mb-4 font-bold">UR STATUS</p>
+    <div className="bg-white stamp p-5 h-full flex flex-col">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-[#7A4200] mb-4 font-bold">UR STATUS</p>
 
       <div className="flex-1 flex flex-col gap-3 text-sm">
         <Row label="wallet" value={`${publicKey!.toBase58().slice(0, 6)}…${publicKey!.toBase58().slice(-4)}`} />
@@ -121,19 +125,19 @@ export function MintPanel() {
       </div>
 
       {/* Mint progress pips */}
-      <div className="mt-5 pt-4 border-t border-[#1a1a1a] space-y-2">
+      <div className="mt-5 pt-4 border-t border-[#f0e8c0] space-y-2">
         <div className="flex gap-1">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className={`flex-1 h-1.5 ${i < status.mintsUsed ? "bg-[#00ff88]" : "bg-[#1e1e1e]"}`}
+              className={`flex-1 h-1.5 ${i < status.mintsUsed ? "bg-[#C8102E]" : "bg-[#f0d080]"}`}
             />
           ))}
         </div>
-        <p className="text-[11px] text-[#444]">
+        <p className="text-[11px] text-[#7A4200]/60">
           {status.mintsRemaining === 0
             ? "max mints reached — sell or check price via chat"
-            : 'say "mint me some bao" in chat → 250k $BAO for $2'}
+            : 'say "mint me some bao" in chat → 250k $BAO for 0.022 SOL'}
         </p>
       </div>
     </div>
@@ -152,11 +156,11 @@ function Row({
   warn?: boolean;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5 border-b border-[#141414]">
-      <span className="text-[11px] text-[#555] uppercase tracking-wider shrink-0">{label}</span>
+    <div className="flex items-baseline justify-between gap-4 py-1.5 border-b border-[#f0e8c0]">
+      <span className="text-[11px] text-[#7A4200] uppercase tracking-wider shrink-0">{label}</span>
       <span
         className={`text-xs font-bold text-right ${
-          green ? "text-[#00ff88]" : warn ? "text-yellow-500" : "text-[#aaa]"
+          green ? "text-[#006064]" : warn ? "text-[#E65100]" : "text-[#1A0500]"
         }`}
       >
         {value}

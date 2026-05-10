@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program;
 use anchor_spl::token::{self, Mint, Token, TokenAccount};
-use crate::state::{BondingCurve, TRADING_FEE_BPS};
+use crate::state::BondingCurve;
 use crate::errors::LaunchpadError;
 
 #[derive(Accounts)]
@@ -33,10 +32,6 @@ pub struct Sell<'info> {
     )]
     pub user_token_account: Account<'info, TokenAccount>,
 
-    /// CHECK: treasury receives trading fees
-    #[account(mut, address = bonding_curve.treasury)]
-    pub treasury: UncheckedAccount<'info>,
-
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
@@ -47,29 +42,16 @@ pub fn sell(ctx: Context<Sell>, token_amount: u64, min_sol_out: u64) -> Result<(
     require!(!bonding_curve.graduated, LaunchpadError::AlreadyGraduated);
     require!(token_amount > 0, LaunchpadError::ZeroAmount);
 
-    // Calculate SOL out via bonding curve
-    let sol_out_gross = bonding_curve
+    // SOL out — no fee deducted, full AMM value returned to seller
+    let sol_out = bonding_curve
         .get_sol_for_tokens(token_amount)
         .ok_or(LaunchpadError::MathOverflow)?;
 
-    // Deduct 1% trading fee
-    let trading_fee = sol_out_gross
-        .checked_mul(TRADING_FEE_BPS)
-        .and_then(|v| v.checked_div(10_000))
-        .ok_or(LaunchpadError::MathOverflow)?;
-    let sol_out_net = sol_out_gross
-        .checked_sub(trading_fee)
-        .ok_or(LaunchpadError::MathOverflow)?;
-
-    require!(sol_out_net >= min_sol_out, LaunchpadError::SlippageExceeded);
+    require!(sol_out >= min_sol_out, LaunchpadError::SlippageExceeded);
 
     // Burn user's tokens
     let mint_key = ctx.accounts.mint.key();
-    let seeds = &[
-        b"bonding_curve",
-        mint_key.as_ref(),
-        &[bonding_curve.bump],
-    ];
+    let seeds = &[b"bonding_curve", mint_key.as_ref(), &[bonding_curve.bump]];
     let signer_seeds = &[&seeds[..]];
 
     token::burn(
@@ -85,10 +67,10 @@ pub fn sell(ctx: Context<Sell>, token_amount: u64, min_sol_out: u64) -> Result<(
         token_amount,
     )?;
 
-    // Update bonding curve reserves
+    // Update reserves
     bonding_curve.virtual_sol_reserves = bonding_curve
         .virtual_sol_reserves
-        .checked_sub(sol_out_gross)
+        .checked_sub(sol_out)
         .ok_or(LaunchpadError::MathOverflow)?;
     bonding_curve.virtual_token_reserves = bonding_curve
         .virtual_token_reserves
@@ -96,30 +78,16 @@ pub fn sell(ctx: Context<Sell>, token_amount: u64, min_sol_out: u64) -> Result<(
         .ok_or(LaunchpadError::MathOverflow)?;
     bonding_curve.real_sol_reserves = bonding_curve
         .real_sol_reserves
-        .checked_sub(sol_out_gross)
+        .checked_sub(sol_out)
         .ok_or(LaunchpadError::MathOverflow)?;
     bonding_curve.real_token_reserves = bonding_curve
         .real_token_reserves
         .checked_sub(token_amount)
         .ok_or(LaunchpadError::MathOverflow)?;
 
-    // Send SOL to user (net of fee)
-    **bonding_curve.to_account_info().try_borrow_mut_lamports()? -= sol_out_net;
-    **ctx.accounts.user.try_borrow_mut_lamports()? += sol_out_net;
-
-    // Send fee to treasury
-    if trading_fee > 0 {
-        system_program::transfer(
-            CpiContext::new(
-                ctx.accounts.system_program.to_account_info(),
-                system_program::Transfer {
-                    from: ctx.accounts.user.to_account_info(),
-                    to: ctx.accounts.treasury.to_account_info(),
-                },
-            ),
-            trading_fee,
-        )?;
-    }
+    // Return full SOL to user — direct lamport transfer from PDA
+    **bonding_curve.to_account_info().try_borrow_mut_lamports()? -= sol_out;
+    **ctx.accounts.user.try_borrow_mut_lamports()? += sol_out;
 
     Ok(())
 }

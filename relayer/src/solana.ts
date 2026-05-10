@@ -1,5 +1,5 @@
-import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, SystemProgram } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Connection, Keypair, PublicKey, Transaction, TransactionInstruction, SystemProgram, ComputeBudgetProgram } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from "@solana/spl-token";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes/index.js";
 import { createHash } from "crypto";
 import fs from "fs";
@@ -67,17 +67,30 @@ export async function buildRegisterUserTx(userPubkey: PublicKey): Promise<Transa
   return tx;
 }
 
-export async function buildBuyTx(userPubkey: PublicKey): Promise<Transaction> {
+export async function buildBuyTx(userPubkey: PublicKey, quantity: number = 1): Promise<Transaction> {
+  const qty = Math.max(1, Math.min(10, Math.floor(quantity)));
   const connection = getConnection();
   const relayer = getRelayerKeypair();
   const bondingCurvePda = getBondingCurvePda();
   const userAccountPda = getUserAccountPda(userPubkey);
-
   const userTokenAccount = await getAssociatedTokenAddress(MINT_PUBKEY, userPubkey);
 
-  const minTokensOut = encodeU64(0n); // no slippage protection for MVP
+  const tx = new Transaction();
+  tx.feePayer = relayer.publicKey;
 
-  const ix = new TransactionInstruction({
+  // Increase compute budget for batch mints (each buy ~25k CU)
+  tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 60_000 * qty + 50_000 }));
+
+  // Create ATA if it doesn't exist — relayer pays so user only signs once
+  const ataInfo = await connection.getAccountInfo(userTokenAccount);
+  if (!ataInfo) {
+    tx.add(createAssociatedTokenAccountInstruction(
+      userPubkey, userTokenAccount, userPubkey, MINT_PUBKEY
+    ));
+  }
+
+  const minTokensOut = encodeU64(0n);
+  const buyIx = new TransactionInstruction({
     programId: PROGRAM_ID,
     keys: [
       { pubkey: userPubkey, isSigner: true, isWritable: true },
@@ -86,15 +99,15 @@ export async function buildBuyTx(userPubkey: PublicKey): Promise<Transaction> {
       { pubkey: MINT_PUBKEY, isSigner: false, isWritable: true },
       { pubkey: CURVE_TOKEN_ACCOUNT, isSigner: false, isWritable: true },
       { pubkey: userTokenAccount, isSigner: false, isWritable: true },
-      { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
     data: Buffer.concat([discriminator("buy"), minTokensOut]),
   });
 
-  const tx = new Transaction().add(ix);
-  tx.feePayer = relayer.publicKey;
+  // Add one buy instruction per mint slot requested
+  for (let i = 0; i < qty; i++) tx.add(buyIx);
+
   tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
   tx.partialSign(relayer);
   return tx;
@@ -120,7 +133,6 @@ export async function buildSellTx(userPubkey: PublicKey, tokenAmount: bigint): P
       { pubkey: MINT_PUBKEY, isSigner: false, isWritable: true },
       { pubkey: CURVE_TOKEN_ACCOUNT, isSigner: false, isWritable: true },
       { pubkey: userTokenAccount, isSigner: false, isWritable: true },
-      { pubkey: TREASURY_PUBKEY, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],

@@ -1,11 +1,12 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
-use crate::state::BondingCurve;
+use crate::state::{BondingCurve, GRADUATION_SOL_THRESHOLD};
 use crate::errors::LaunchpadError;
 
-// Graduation creates a Raydium CLMM pool and burns LP tokens.
-// Full Raydium CPI integration requires their SDK — stubbed here,
-// to be wired up once the program core is verified on devnet.
+// Graduation drains the bonding curve PDA escrow:
+//   85 SOL → Raydium CLMM pool (CPI stubbed, currently sent to authority)
+//   Remaining → treasury as dev revenue
+// Full Raydium CPI to be wired once program core is verified on devnet.
 
 #[derive(Accounts)]
 pub struct Graduate<'info> {
@@ -40,18 +41,26 @@ pub fn graduate(ctx: Context<Graduate>) -> Result<()> {
     require!(!bonding_curve.graduated, LaunchpadError::AlreadyGraduated);
     require!(bonding_curve.should_graduate(), LaunchpadError::NotReadyToGraduate);
 
-    // Mark as graduated — halts all buys/sells on this program
     bonding_curve.graduated = true;
 
-    // TODO: CPI into Raydium CLMM to create pool with:
-    //   - bonding_curve.real_sol_reserves (collected SOL)
-    //   - LP_RESERVE tokens (5B minted fresh for the pool)
-    // Then burn LP tokens to lock liquidity permanently.
+    // All escrowed mint fees → Raydium LP. Dev earns 0 from mints — only trading fees.
+    let curve_info = bonding_curve.to_account_info();
+    let rent = Rent::get()?;
+    let rent_exempt = rent.minimum_balance(BondingCurve::LEN + 8);
+    let to_raydium = curve_info.lamports().saturating_sub(rent_exempt);
+
+    // TODO: replace with Raydium CLMM CPI — pair to_raydium SOL + LP_RESERVE tokens,
+    // then lock LP tokens via Streamflow. Temporarily credited to authority.
+    if to_raydium > 0 {
+        **curve_info.lamports.borrow_mut() -= to_raydium;
+        **ctx.accounts.authority.lamports.borrow_mut() += to_raydium;
+    }
 
     emit!(GraduationEvent {
         mint: bonding_curve.mint,
         sol_raised: bonding_curve.real_sol_reserves,
         tokens_sold: bonding_curve.real_token_reserves,
+        to_raydium,
     });
 
     Ok(())
@@ -62,4 +71,5 @@ pub struct GraduationEvent {
     pub mint: Pubkey,
     pub sol_raised: u64,
     pub tokens_sold: u64,
+    pub to_raydium: u64,
 }

@@ -4,13 +4,16 @@ import { z } from "zod";
 import { PublicKey } from "@solana/web3.js";
 import { buildBuyTx, getUserStatus } from "../solana.js";
 
-const schema = z.object({ wallet: z.string().min(32) });
+const schema = z.object({
+  wallet: z.string().min(32),
+  quantity: z.number().int().min(1).max(10).default(1),
+});
 
 export const buyRoute = new Hono().post(
   "/",
   zValidator("json", schema),
   async (c) => {
-    const { wallet } = c.req.valid("json");
+    const { wallet, quantity } = c.req.valid("json");
 
     try {
       const userPubkey = new PublicKey(wallet);
@@ -23,15 +26,18 @@ export const buyRoute = new Hono().post(
         return c.json({ success: false, error: "Max 10 mints per wallet reached." }, 400);
       }
 
-      const tx = await buildBuyTx(userPubkey);
+      const actualQty = Math.min(quantity, status.mintsRemaining);
+      const tx = await buildBuyTx(userPubkey, actualQty);
       const serialized = tx.serialize({ requireAllSignatures: false }).toString("base64");
+      const tokensToReceive = actualQty * 250_000;
 
       return c.json({
         success: true,
         transaction: serialized,
-        message: "Sign this transaction to mint 250,000 $BAO",
-        tokensToReceive: 250_000,
-        mintsRemaining: status.mintsRemaining - 1,
+        quantity: actualQty,
+        tokensToReceive,
+        mintsRemaining: status.mintsRemaining - actualQty,
+        message: `Sign to mint ${tokensToReceive.toLocaleString()} $BAO (${actualQty} × 250,000)`,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

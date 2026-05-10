@@ -5,9 +5,8 @@ pub const VIRTUAL_TOKEN_RESERVES: u64 = 10_000_000_000_000_000; // 10B tokens (6
 pub const TOKEN_TOTAL_SUPPLY: u64 = 10_000_000_000_000_000; // 10B max supply (6 decimals)
 pub const PUBLIC_MINT_CAP: u64 = 5_000_000_000_000_000; // 5B public mint (50%)
 pub const LP_RESERVE: u64 = 5_000_000_000_000_000; // 5B LP reserve at graduation (50%)
-pub const TRADING_FEE_BPS: u64 = 100; // 1% fee on buys/sells (100 basis points)
-pub const GRADUATION_SOL_THRESHOLD: u64 = 85_000_000_000; // 85 SOL in lamports
-pub const MINT_FEE_LAMPORTS: u64 = 2_000_000; // ~$2 in SOL (adjust per price)
+pub const GRADUATION_SOL_THRESHOLD: u64 = 440_000_000_000; // 440 SOL — all 20,000 mints fill LP
+pub const MINT_FEE_LAMPORTS: u64 = 22_000_000; // 0.022 SOL per mint
 pub const MAX_MINTS_PER_USER: u8 = 10;
 pub const TOKENS_PER_MINT: u64 = 250_000_000_000; // 250K tokens per mint (6 decimals)
 
