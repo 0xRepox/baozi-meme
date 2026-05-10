@@ -11,7 +11,7 @@ import { userRoute } from "./routes/user.js";
 const app = new Hono();
 
 app.use("*", logger());
-app.use("*", cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:3000" }));
+app.use("*", cors());
 
 app.get("/health", (c) => c.json({ ok: true }));
 
