@@ -6,7 +6,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV");
+declare_id!("51FZiDCAqQMYwGxv9YgQa6jv3bs5r263PomDMrPPyg8E");
 
 #[program]
 pub mod launchpad {

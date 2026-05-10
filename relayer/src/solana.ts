@@ -3,7 +3,7 @@ import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createAssociatedTokenAccou
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes/index.js";
 import { createHash } from "crypto";
 
-export const PROGRAM_ID = new PublicKey("BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV");
+export const PROGRAM_ID = new PublicKey("51FZiDCAqQMYwGxv9YgQa6jv3bs5r263PomDMrPPyg8E");
 export const MINT_PUBKEY = new PublicKey(process.env.MINT_PUBKEY!);
 
 export function getConnection(): Connection {

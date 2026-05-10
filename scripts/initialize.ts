@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { createHash } from "crypto";
 import "dotenv/config";
 
-const PROGRAM_ID = new PublicKey("BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV");
+const PROGRAM_ID = new PublicKey("51FZiDCAqQMYwGxv9YgQa6jv3bs5r263PomDMrPPyg8E");
 const RPC = process.env.RPC_URL ?? "https://api.devnet.solana.com";
 
 function loadKeypair(path: string): Keypair {

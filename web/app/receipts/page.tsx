@@ -4,7 +4,7 @@ import { WalletButton } from "../components/WalletButton";
 import { LivePrice } from "../components/LivePrice";
 import { MintStatePanel } from "../components/MintStatePanel";
 
-const PROGRAM_ID = "BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV";
+const PROGRAM_ID = "51FZiDCAqQMYwGxv9YgQa6jv3bs5r263PomDMrPPyg8E";
 
 const PILLARS = [
   {

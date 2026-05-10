@@ -6,7 +6,7 @@ import {
 import { readFileSync } from "fs";
 import { createHash } from "crypto";
 
-const PROGRAM_ID      = new PublicKey("BBP3vz9Bm4Fx21UZmmWAoykL4shNbTxCrAXtmUrBMEuV");
+const PROGRAM_ID      = new PublicKey("51FZiDCAqQMYwGxv9YgQa6jv3bs5r263PomDMrPPyg8E");
 const MINT_PUBKEY     = new PublicKey(process.env.MINT_PUBKEY!);
 const METAPLEX_ID     = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 const RPC_URL         = process.env.RPC_URL ?? "https://api.devnet.solana.com";
